@@ -400,7 +400,7 @@ function DiscussionPhase({ roomState, isHost, advancePhase }) {
     <div className="space-y-6 animate-in fade-in zoom-in duration-300">
       <Card className="text-center p-6 space-y-4">
         <h2 className="text-sm font-semibold text-brand-secondary tracking-widest uppercase">
-          <DecryptedText text={`Round ${roomState.currentRound + 1} Discussion`} />
+          <DecryptedText text={`Round ${(roomState.current_round || 0) + 1} Discussion`} />
         </h2>
         
         {roomState.settings?.discussionUnlimited ? (
