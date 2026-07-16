@@ -5,6 +5,7 @@ import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
 import { useGame } from '../context/GameContext';
 import { Loader2, Hash, QrCode, Camera, X } from 'lucide-react';
+import { DecryptedText } from '../components/ui/ReactBits';
 
 function QRScanner({ onScan, onClose }) {
   const scannerRef = useRef(null);
@@ -179,7 +180,9 @@ export default function JoinRoom() {
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
       <Card className="flex flex-col space-y-6">
         <div className="text-center space-y-2">
-          <h2 className="text-2xl font-bold uppercase tracking-wide">Join a Game</h2>
+          <h2 className="text-2xl font-bold uppercase tracking-wide">
+            <DecryptedText text="Join a Game" />
+          </h2>
           <p className="text-sm text-brand-offwhite/60">Enter the 8-character room code.</p>
         </div>
 
