@@ -25,3 +25,13 @@ pgdata/
 
 # Game documents
 docs/
+
+# Caches and logs
+.vite/
+app/.vite/
+.eslintcache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
