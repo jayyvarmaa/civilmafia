@@ -294,7 +294,7 @@ const resolveRoomVotes = async (roomCode) => {
       );
     } else {
       await pool.query(
-        `UPDATE rooms SET phase = 'elimination_reveal', current_round = current_round + 1 WHERE room_code = $2`,
+        `UPDATE rooms SET phase = 'elimination_reveal', current_round = current_round + 1 WHERE room_code = $1`,
         [roomCode]
       );
     }
