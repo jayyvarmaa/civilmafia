@@ -30,8 +30,16 @@ export default function Landing() {
         <h1 className="text-5xl font-black tracking-tighter text-brand-primary drop-shadow-md uppercase">
           <SplitText text="Sleeper Cell" delay={0.06} />
         </h1>
-        <p className="text-lg text-brand-offwhite/80">
-          <ShinyText text="Trust no one." speed={4} />
+        <p className="text-lg text-brand-offwhite/80 flex items-center justify-center gap-1 flex-wrap">
+          <ShinyText text="Trust no one. Not even " speed={4} />
+          <a
+            href="https://instagram.com/jayyvarmaa"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-brand-secondary hover:underline font-bold transition-all"
+          >
+            <ShinyText text="@jayyvarmaa" speed={4} />
+          </a>
         </p>
       </div>
 
