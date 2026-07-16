@@ -37,6 +37,8 @@ export const GameProvider = ({ children }) => {
     localStorage.setItem('sleeper_player_name', name);
   };
 
+  const [socketConnected, setSocketConnected] = useState(false);
+
   // Initialize socket
   useEffect(() => {
     if (!playerId) return;
@@ -48,10 +50,17 @@ export const GameProvider = ({ children }) => {
 
     newSocket.on('connect', () => {
       console.log(`[SOCKET_CONNECT] Connected. Socket ID: ${newSocket.id}`);
+      setSocketConnected(true);
+    });
+
+    newSocket.on('disconnect', () => {
+      console.log(`[SOCKET_DISCONNECT] Socket disconnected`);
+      setSocketConnected(false);
     });
 
     newSocket.on('connect_error', (err) => {
       console.error('[SOCKET_ERROR] Connection failed:', err.message);
+      setSocketConnected(false);
     });
 
     setSocket(newSocket);
@@ -205,7 +214,8 @@ export const GameProvider = ({ children }) => {
     advancePhase,
     castVote,
     endVoting,
-    resetGame
+    resetGame,
+    socketConnected
   };
 
   return (

@@ -6,9 +6,40 @@ import { Button } from '../components/ui/Button';
 import { 
   Users, Settings, Play, Loader2, Minus, Plus, Timer, 
   Volume2, VolumeX, Infinity, Eye, EyeOff, Skull, 
-  AlertTriangle, Award, RefreshCw, LogOut, CheckCircle 
+  AlertTriangle, Award, RefreshCw, LogOut, CheckCircle, WifiOff 
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
+import { playSound, triggerVibrate } from '../utils/feedback';
+
+// --- Stylized Initials Avatar Component ---
+
+const getAvatarColor = (name) => {
+  const colors = [
+    'from-red-500 to-red-600',
+    'from-blue-500 to-blue-600',
+    'from-green-500 to-green-600',
+    'from-yellow-500 to-yellow-600',
+    'from-purple-500 to-purple-600',
+    'from-pink-500 to-pink-600',
+    'from-indigo-500 to-indigo-600',
+    'from-teal-500 to-teal-600'
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
+};
+
+function Avatar({ name }) {
+  const initials = name ? name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : '?';
+  const color = getAvatarColor(name || '');
+  return (
+    <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${color} flex items-center justify-center text-white font-black text-sm shadow-md border border-white/10`}>
+      {initials}
+    </div>
+  );
+}
 
 // --- Sub-components for Settings ---
 
@@ -87,8 +118,8 @@ function TimerStepper({ label, value, unlimited, onValueChange, onUnlimitedToggl
   );
 }
 
-// Live Countdown Timer hook/renderer
-function ActiveTimer({ targetTime, label = "Time Remaining" }) {
+// Live Countdown Timer hook/renderer with tick audio
+function ActiveTimer({ targetTime, label = "Time Remaining", soundEnabled = true }) {
   const [timeLeft, setTimeLeft] = useState(0);
 
   useEffect(() => {
@@ -104,13 +135,20 @@ function ActiveTimer({ targetTime, label = "Time Remaining" }) {
     const interval = setInterval(() => {
       const remaining = calculateTime();
       setTimeLeft(remaining);
+      
+      // Play a countdown tick sound on the last 5 seconds
+      if (remaining > 0 && remaining <= 5) {
+        playSound('tick', soundEnabled);
+        triggerVibrate(30);
+      }
+
       if (remaining <= 0) {
         clearInterval(interval);
       }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [targetTime]);
+  }, [targetTime, soundEnabled]);
 
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
@@ -119,7 +157,7 @@ function ActiveTimer({ targetTime, label = "Time Remaining" }) {
   return (
     <div className="text-center space-y-1">
       <span className="text-xs uppercase tracking-widest text-brand-offwhite/50">{label}</span>
-      <div className={`text-4xl font-mono font-black tracking-wider ${timeLeft <= 10 ? 'text-brand-primary animate-pulse' : 'text-brand-secondary'}`}>
+      <div className={`text-4xl font-mono font-black tracking-wider ${timeLeft <= 5 ? 'text-brand-primary animate-pulse' : 'text-brand-secondary'}`}>
         {formattedTime}
       </div>
     </div>
@@ -154,8 +192,11 @@ function LobbyPhase({ roomCode, playerList, isHost, settings, totalPlayers, mafi
             <p className="text-brand-offwhite/50 text-sm text-center py-4">Waiting for players...</p>
           ) : (
             playerList.map((p, idx) => (
-              <div key={idx} className="flex items-center justify-between bg-white/5 rounded-lg p-3">
-                <span className="font-medium">{p.name}</span>
+              <div key={idx} className="flex items-center justify-between bg-white/5 rounded-lg p-3 border border-white/5 animate-in slide-in-from-bottom duration-300">
+                <div className="flex items-center gap-3">
+                  <Avatar name={p.name} />
+                  <span className="font-semibold">{p.name}</span>
+                </div>
                 {p.isHost && (
                   <span className="text-xs bg-brand-secondary/20 text-brand-secondary px-2 py-1 rounded-full uppercase font-bold tracking-wider">
                     Host
@@ -276,14 +317,21 @@ function RevealPhase({ roomState, playerId, players, isHost, advancePhase }) {
   });
 
   const handleRevealToggle = () => {
-    setShowRole(!showRole);
+    const nextShow = !showRole;
+    setShowRole(nextShow);
+    
+    // Play role specific arpeggio / suspension chord and vibrate on reveal
+    if (nextShow) {
+      playSound(isMafia ? 'reveal_mafia' : 'reveal_civilian', roomState.settings?.soundEnabled);
+      triggerVibrate(isMafia ? [200, 100, 200] : [100, 50, 100]);
+    }
+
     if (!hasSeenHint) {
       setHasSeenHint(true);
       localStorage.setItem('hasSeenRoleRevealHint', 'true');
     }
   };
 
-  // Find other mafia players
   const fellowMafia = Object.entries(players)
     .filter(([id, p]) => id !== playerId && p.role === 'mafia')
     .map(([_, p]) => p.name);
@@ -296,7 +344,7 @@ function RevealPhase({ roomState, playerId, players, isHost, advancePhase }) {
             <h2 className="text-2xl font-bold uppercase tracking-wide">Your Secret Role</h2>
             <button
               onClick={handleRevealToggle}
-              className="w-24 h-24 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-brand-secondary hover:bg-white/10 transition-all active:scale-95"
+              className="w-24 h-24 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-brand-secondary hover:bg-white/10 transition-all active:scale-95 shadow-lg"
             >
               <Eye className="h-10 w-10" />
             </button>
@@ -373,7 +421,11 @@ function DiscussionPhase({ roomState, isHost, advancePhase }) {
             <p className="text-xs text-brand-offwhite/50">Talk in person. Host will trigger voting when ready.</p>
           </div>
         ) : (
-          <ActiveTimer targetTime={roomState.discussion_ends_at} label="Discussion Ends In" />
+          <ActiveTimer 
+            targetTime={roomState.discussion_ends_at} 
+            label="Discussion Ends In" 
+            soundEnabled={roomState.settings?.soundEnabled}
+          />
         )}
       </Card>
 
@@ -396,7 +448,6 @@ function VotingPhase({ roomState, playerId, players, isHost, castVote, endVoting
   const self = players[playerId] || {};
   const isSelfAlive = self.isAlive !== false;
   
-  // Tally current votes
   const playerList = Object.entries(players).map(([id, p]) => ({ id, ...p }));
   const voteTallies = {};
   playerList.forEach(p => { if (p.isAlive !== false) voteTallies[p.id] = 0; });
@@ -409,6 +460,13 @@ function VotingPhase({ roomState, playerId, players, isHost, castVote, endVoting
   const totalVotesCast = playerList.filter(p => p.isAlive !== false && p.hasVoted).length;
   const totalLivingPlayers = playerList.filter(p => p.isAlive !== false).length;
 
+  const handleCastVote = (targetId) => {
+    // Play short arpeggio click and trigger haptic
+    playSound('vote', roomState.settings?.soundEnabled);
+    triggerVibrate(40);
+    castVote(targetId);
+  };
+
   return (
     <div className="space-y-5 animate-in fade-in zoom-in duration-300">
       <Card className="text-center p-4 space-y-2">
@@ -418,7 +476,11 @@ function VotingPhase({ roomState, playerId, players, isHost, castVote, endVoting
         {roomState.settings?.votingUnlimited ? (
           <p className="text-xs text-brand-offwhite/50">Host will resolve voting manually.</p>
         ) : (
-          <ActiveTimer targetTime={roomState.voting_ends_at} label="Voting Ends In" />
+          <ActiveTimer 
+            targetTime={roomState.voting_ends_at} 
+            label="Voting Ends In" 
+            soundEnabled={roomState.settings?.soundEnabled}
+          />
         )}
         <div className="text-sm font-bold text-brand-secondary">
           Votes Cast: {totalVotesCast} / {totalLivingPlayers}
@@ -432,28 +494,39 @@ function VotingPhase({ roomState, playerId, players, isHost, castVote, endVoting
           .map((p, idx) => {
             const hasVotedForThis = self.votedFor === p.id;
             const isSelf = p.id === playerId;
+            const hasVotedCheck = p.hasVoted;
 
             return (
               <div 
                 key={idx} 
-                className={`flex items-center justify-between rounded-xl p-3 border transition-all ${
+                className={`flex items-center justify-between rounded-xl p-3 border transition-all animate-in slide-in-from-bottom duration-300 ${
                   hasVotedForThis 
                     ? 'bg-brand-primary/10 border-brand-primary' 
                     : 'bg-white/5 border-white/5'
                 }`}
               >
-                <div className="flex flex-col">
-                  <span className="font-semibold text-lg">{p.name} {isSelf && "(You)"}</span>
-                  <span className="text-xs text-brand-offwhite/50">
-                    Votes against: {voteTallies[p.id] || 0}
-                  </span>
+                <div className="flex items-center gap-3">
+                  <Avatar name={p.name} />
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-lg flex items-center gap-1.5">
+                      {p.name} {isSelf && "(You)"}
+                      {hasVotedCheck && (
+                        <span className="text-[10px] uppercase font-black px-1.5 py-0.5 bg-brand-secondary/20 text-brand-secondary rounded-full tracking-wide">
+                          Voted
+                        </span>
+                      )}
+                    </span>
+                    <span className="text-xs text-brand-offwhite/50">
+                      Votes against: {voteTallies[p.id] || 0}
+                    </span>
+                  </div>
                 </div>
                 
                 {isSelfAlive && !isSelf && (
                   <Button
                     size="sm"
                     variant={hasVotedForThis ? "danger" : "outline"}
-                    onClick={() => castVote(hasVotedForThis ? null : p.id)}
+                    onClick={() => handleCastVote(hasVotedForThis ? null : p.id)}
                   >
                     {hasVotedForThis ? 'Voted' : 'Vote'}
                   </Button>
@@ -473,7 +546,7 @@ function VotingPhase({ roomState, playerId, players, isHost, castVote, endVoting
             {playerList
               .filter(p => p.isAlive === false)
               .map((p, idx) => (
-                <div key={idx} className="flex items-center gap-1 bg-white/5 px-2.5 py-1 rounded-full text-xs text-brand-offwhite/50 border border-white/5">
+                <div key={idx} className="flex items-center gap-1.5 bg-white/5 px-2.5 py-1 rounded-full text-xs text-brand-offwhite/50 border border-white/5">
                   <Skull className="h-3 w-3 text-brand-primary" />
                   <span className="line-through">{p.name}</span>
                 </div>
@@ -495,6 +568,14 @@ function VotingPhase({ roomState, playerId, players, isHost, castVote, endVoting
 function EliminationRevealPhase({ roomState, playerId, players, isHost, advancePhase }) {
   const lastElimination = roomState.eliminationHistory?.[roomState.eliminationHistory.length - 1];
   const eliminatedPlayer = lastElimination ? players[lastElimination.eliminated_player_id] : null;
+
+  // Trigger elimination sound on render
+  useEffect(() => {
+    if (lastElimination) {
+      playSound('elimination', roomState.settings?.soundEnabled);
+      triggerVibrate([300, 100, 300]);
+    }
+  }, [lastElimination]);
 
   return (
     <div className="space-y-6 animate-in fade-in zoom-in duration-300">
@@ -545,6 +626,12 @@ function GameOverPhase({ roomState, isHost, players, resetGame }) {
   const navigate = useNavigate();
   const history = roomState.eliminationHistory || [];
   const won = roomState.winner === 'civilians' ? 'Civilians Win' : 'Sleeper Cells Win';
+
+  // Trigger arpeggio on render
+  useEffect(() => {
+    playSound('win', roomState.settings?.soundEnabled);
+    triggerVibrate([100, 50, 100, 50, 300]);
+  }, [roomState.winner]);
 
   return (
     <div className="space-y-6 animate-in fade-in zoom-in duration-300">
@@ -606,7 +693,8 @@ export default function Lobby() {
   const navigate = useNavigate();
   const { 
     roomState, players, isHost, playerId, updateSettings, 
-    startGame, advancePhase, castVote, endVoting, resetGame 
+    startGame, advancePhase, castVote, endVoting, resetGame,
+    socketConnected
   } = useGame();
 
   const [localSettings, setLocalSettings] = React.useState(null);
@@ -631,7 +719,6 @@ export default function Lobby() {
   const playerList = Object.values(players || {});
   const settings = localSettings || roomState.settings || {};
 
-  // Validate mafia count: 1 ≤ mafiaCount < totalPlayers
   const totalPlayers = settings.totalPlayers || 5;
   const mafiaCount = settings.mafiaCount || 1;
   const maxMafia = Math.max(1, totalPlayers - 1);
@@ -639,15 +726,12 @@ export default function Lobby() {
   const handleSettingChange = (key, value) => {
     const updated = { ...settings, [key]: value };
 
-    // Auto-clamp mafiaCount if totalPlayers changes
     if (key === 'totalPlayers' && updated.mafiaCount >= value) {
       updated.mafiaCount = Math.max(1, value - 1);
     }
 
-    // 1. Update UI state instantly
     setLocalSettings(updated);
 
-    // 2. Debounce database/socket update to prevent lag
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current);
     }
@@ -656,72 +740,93 @@ export default function Lobby() {
     }, 250);
   };
 
-  // Render correct view based on the current phase
-  switch (roomState.phase) {
-    case 'countdown':
-      return <CountdownPhase />;
-    case 'reveal':
-      return (
-        <RevealPhase 
-          roomState={roomState} 
-          playerId={playerId} 
-          players={players} 
-          isHost={isHost} 
-          advancePhase={advancePhase} 
-        />
-      );
-    case 'discussion':
-      return (
-        <DiscussionPhase 
-          roomState={roomState} 
-          isHost={isHost} 
-          advancePhase={advancePhase} 
-        />
-      );
-    case 'voting':
-      return (
-        <VotingPhase 
-          roomState={roomState} 
-          playerId={playerId} 
-          players={players} 
-          isHost={isHost} 
-          castVote={castVote} 
-          endVoting={endVoting} 
-        />
-      );
-    case 'elimination_reveal':
-      return (
-        <EliminationRevealPhase 
-          roomState={roomState} 
-          playerId={playerId} 
-          players={players} 
-          isHost={isHost} 
-          advancePhase={advancePhase} 
-        />
-      );
-    case 'game_over':
-      return (
-        <GameOverPhase 
-          roomState={roomState} 
-          isHost={isHost} 
-          players={players} 
-          resetGame={resetGame} 
-        />
-      );
-    case 'lobby':
-    default:
-      return (
-        <LobbyPhase 
-          roomCode={roomCode}
-          playerList={playerList}
-          isHost={isHost}
-          settings={settings}
-          totalPlayers={totalPlayers}
-          mafiaCount={mafiaCount}
-          maxMafia={maxMafia}
-          handleSettingChange={handleSettingChange}
-          startGame={startGame}
-        />
-      );
-  }
+  return (
+    <div className="relative">
+      {/* ⚠️ Full Screen overlay when socket disconnects */}
+      {!socketConnected && (
+        <div className="fixed inset-0 bg-brand-base/90 backdrop-blur-md z-50 flex flex-col items-center justify-center text-center space-y-4 animate-in fade-in duration-300">
+          <WifiOff className="h-16 w-16 text-brand-primary animate-bounce" />
+          <div className="space-y-1">
+            <h2 className="text-2xl font-bold uppercase tracking-wide text-brand-offwhite">
+              Connection Lost
+            </h2>
+            <p className="text-sm text-brand-offwhite/60 max-w-[250px]">
+              Reconnecting to game server... Your seat and role are saved.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Render phase content */}
+      {(() => {
+        switch (roomState.phase) {
+          case 'countdown':
+            return <CountdownPhase />;
+          case 'reveal':
+            return (
+              <RevealPhase 
+                roomState={roomState} 
+                playerId={playerId} 
+                players={players} 
+                isHost={isHost} 
+                advancePhase={advancePhase} 
+              />
+            );
+          case 'discussion':
+            return (
+              <DiscussionPhase 
+                roomState={roomState} 
+                isHost={isHost} 
+                advancePhase={advancePhase} 
+              />
+            );
+          case 'voting':
+            return (
+              <VotingPhase 
+                roomState={roomState} 
+                playerId={playerId} 
+                players={players} 
+                isHost={isHost} 
+                castVote={castVote} 
+                endVoting={endVoting} 
+              />
+            );
+          case 'elimination_reveal':
+            return (
+              <EliminationRevealPhase 
+                roomState={roomState} 
+                playerId={playerId} 
+                players={players} 
+                isHost={isHost} 
+                advancePhase={advancePhase} 
+              />
+            );
+          case 'game_over':
+            return (
+              <GameOverPhase 
+                roomState={roomState} 
+                isHost={isHost} 
+                players={players} 
+                resetGame={resetGame} 
+              />
+            );
+          case 'lobby':
+          default:
+            return (
+              <LobbyPhase 
+                roomCode={roomCode}
+                playerList={playerList}
+                isHost={isHost}
+                settings={settings}
+                totalPlayers={totalPlayers}
+                mafiaCount={mafiaCount}
+                maxMafia={maxMafia}
+                handleSettingChange={handleSettingChange}
+                startGame={startGame}
+              />
+            );
+        }
+      })()}
+    </div>
+  );
 }

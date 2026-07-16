@@ -1,0 +1,16 @@
+{
+  "short_name": "SleeperCell",
+  "name": "Sleeper Cell deduction game",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#272121",
+  "theme_color": "#FF4D00",
+  "display": "standalone",
+  "orientation": "portrait"
+}
