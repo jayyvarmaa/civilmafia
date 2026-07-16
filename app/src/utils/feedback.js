@@ -30,12 +30,12 @@ export const playSound = (type, enabled = true) => {
     
     if (type === 'tick') {
       osc.frequency.setValueAtTime(600, ctx.currentTime);
-      gain.gain.setValueAtTime(0.04, ctx.currentTime);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
       osc.start();
       osc.stop(ctx.currentTime + 0.08);
     } else if (type === 'reveal_civilian' || type === 'reveal_mafia' || type === 'reveal') {
-      // Mysterious, loud role reveal arpeggio (gain 0.18)
+      // Mysterious, loud role reveal arpeggio
       [440.00, 554.37, 659.25, 880.00].forEach((f, i) => {
         const o = ctx.createOscillator();
         const g = ctx.createGain();
@@ -43,14 +43,14 @@ export const playSound = (type, enabled = true) => {
         o.connect(g);
         g.connect(ctx.destination);
         o.frequency.setValueAtTime(f, ctx.currentTime + i * 0.10);
-        g.gain.setValueAtTime(0.18, ctx.currentTime + i * 0.10);
+        g.gain.setValueAtTime(0.36, ctx.currentTime + i * 0.10);
         g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.10 + 0.35);
         o.start(ctx.currentTime + i * 0.10);
         o.stop(ctx.currentTime + i * 0.10 + 0.35);
       });
     } else if (type === 'vote') {
       osc.frequency.setValueAtTime(440, ctx.currentTime);
-      gain.gain.setValueAtTime(0.03, ctx.currentTime);
+      gain.gain.setValueAtTime(0.06, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
       osc.start();
       osc.stop(ctx.currentTime + 0.06);
@@ -58,7 +58,7 @@ export const playSound = (type, enabled = true) => {
       // Downward frequency sweep
       osc.frequency.setValueAtTime(250, ctx.currentTime);
       osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.45);
-      gain.gain.setValueAtTime(0.12, ctx.currentTime);
+      gain.gain.setValueAtTime(0.24, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
       osc.start();
       osc.stop(ctx.currentTime + 0.45);
@@ -71,7 +71,7 @@ export const playSound = (type, enabled = true) => {
         o.connect(g);
         g.connect(ctx.destination);
         o.frequency.setValueAtTime(f, ctx.currentTime + i * 0.12);
-        g.gain.setValueAtTime(0.06, ctx.currentTime + i * 0.12);
+        g.gain.setValueAtTime(0.12, ctx.currentTime + i * 0.12);
         g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.12 + 0.35);
         o.start(ctx.currentTime + i * 0.12);
         o.stop(ctx.currentTime + i * 0.12 + 0.35);
@@ -112,9 +112,13 @@ export const initializeAudio = () => {
     // Remove listeners once unlocked
     window.removeEventListener('click', init);
     window.removeEventListener('touchstart', init);
+    window.removeEventListener('touchend', init);
+    window.removeEventListener('keydown', init);
   };
 
   window.addEventListener('click', init, { once: true });
   window.addEventListener('touchstart', init, { once: true });
+  window.addEventListener('touchend', init, { once: true });
+  window.addEventListener('keydown', init, { once: true });
 };
 

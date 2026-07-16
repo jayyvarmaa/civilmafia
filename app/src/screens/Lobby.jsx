@@ -311,13 +311,9 @@ function CountdownPhase() {
 function RevealPhase({ roomState, playerId, players, isHost, advancePhase }) {
   const self = players[playerId] || {};
   const isMafia = self.role === 'mafia';
-  const [showRole, setShowRole] = useState(true);
-
-  // Play arpeggio and vibrate immediately when reveal screen mounts
-  useEffect(() => {
-    playSound('reveal', roomState.settings?.soundEnabled);
-    triggerVibrate(isMafia ? [200, 100, 200] : [100, 50, 100]);
-  }, [isMafia, roomState.settings?.soundEnabled]);
+  // Default to false so the user is forced to tap, guaranteeing audio unlock on mobile
+  const [showRole, setShowRole] = useState(false);
+  const [hasPlayedRoleAudio, setHasPlayedRoleAudio] = useState(false);
 
   const fellowMafia = Object.entries(players)
     .filter(([id, p]) => id !== playerId && p.role === 'mafia')
@@ -368,6 +364,10 @@ function RevealPhase({ roomState, playerId, players, isHost, advancePhase }) {
               onClick={() => {
                 setShowRole(true);
                 triggerVibrate(isMafia ? [200, 100, 200] : [100, 50, 100]);
+                if (!hasPlayedRoleAudio) {
+                  playSound('reveal', roomState.settings?.soundEnabled);
+                  setHasPlayedRoleAudio(true);
+                }
               }}
               className="w-24 h-24 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-brand-secondary hover:bg-white/10 transition-all active:scale-95 shadow-lg"
             >
