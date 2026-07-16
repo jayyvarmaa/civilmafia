@@ -153,6 +153,41 @@ export const GameProvider = ({ children }) => {
     }
   };
 
+  const startGame = () => {
+    if (socket && roomCode) {
+      console.log(`[SOCKET_EMIT] start_game`);
+      socket.emit('start_game', { roomCode, playerId });
+    }
+  };
+
+  const advancePhase = (targetPhase) => {
+    if (socket && roomCode) {
+      console.log(`[SOCKET_EMIT] advance_phase -> ${targetPhase}`);
+      socket.emit('advance_phase', { roomCode, playerId, targetPhase });
+    }
+  };
+
+  const castVote = (votedForId) => {
+    if (socket && roomCode) {
+      console.log(`[SOCKET_EMIT] cast_vote -> ${votedForId}`);
+      socket.emit('cast_vote', { roomCode, playerId, votedForId });
+    }
+  };
+
+  const endVoting = () => {
+    if (socket && roomCode) {
+      console.log(`[SOCKET_EMIT] end_voting`);
+      socket.emit('end_voting', { roomCode, playerId });
+    }
+  };
+
+  const resetGame = () => {
+    if (socket && roomCode) {
+      console.log(`[SOCKET_EMIT] reset_game`);
+      socket.emit('reset_game', { roomCode, playerId });
+    }
+  };
+
   const value = {
     roomCode,
     players,
@@ -165,7 +200,12 @@ export const GameProvider = ({ children }) => {
     joinRoom,
     updateSettings,
     setIsHost,
-    saveName
+    saveName,
+    startGame,
+    advancePhase,
+    castVote,
+    endVoting,
+    resetGame
   };
 
   return (
