@@ -1,0 +1,24 @@
+# Dependency directories
+node_modules/
+app/node_modules/
+server/node_modules/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+dist/
+build/
+app/dist/
+
+# IDE and system files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
+
+# Docker/postgres local files (just in case)
+pgdata/
