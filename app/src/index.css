@@ -12,3 +12,22 @@
     @apply font-display;
   }
 }
+
+@keyframes shiny-text {
+  0% {
+    background-position: 120% 0;
+  }
+  100% {
+    background-position: -20% 0;
+  }
+}
+
+.animate-shiny-text {
+  animation: shiny-text 3s linear infinite;
+}
+
+html,
+:host {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}

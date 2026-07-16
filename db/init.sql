@@ -5,7 +5,9 @@ CREATE TABLE rooms (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   settings JSONB DEFAULT '{"totalPlayers": 5, "mafiaCount": 1, "discussionSeconds": 120, "discussionUnlimited": false, "votingSeconds": 60, "votingUnlimited": false, "soundEnabled": true}'::jsonb,
   current_round INT DEFAULT 0,
-  winner VARCHAR(50)
+  winner VARCHAR(50),
+  discussion_ends_at TIMESTAMP,
+  voting_ends_at TIMESTAMP
 );
 
 CREATE TABLE players (

@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { useGame } from '../context/GameContext';
+import { SplitText, ShinyText } from '../components/ui/ReactBits';
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -27,10 +28,10 @@ export default function Landing() {
     <div className="flex flex-col items-center justify-center space-y-8 animate-in fade-in zoom-in duration-500">
       <div className="text-center space-y-4">
         <h1 className="text-5xl font-black tracking-tighter text-brand-primary drop-shadow-md uppercase">
-          Sleeper Cell
+          <SplitText text="Sleeper Cell" delay={0.06} />
         </h1>
         <p className="text-lg text-brand-offwhite/80">
-          Trust no one.
+          <ShinyText text="Trust no one." speed={4} />
         </p>
       </div>
 

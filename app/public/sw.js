@@ -2,7 +2,7 @@ const CACHE_NAME = 'sleepercell-v1';
 const ASSETS = [
   '/',
   '/index.html',
-  '/manifest.json',
+  '/manifest.webmanifest',
   '/favicon.svg'
 ];
 

@@ -7,6 +7,14 @@ const crypto = require('crypto');
 require('dotenv').config();
 
 const app = express();
+app.disable('x-powered-by');
+
+// Security headers middleware
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  next();
+});
+
 app.use(cors());
 app.use(express.json());
 

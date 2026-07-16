@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { playSound, triggerVibrate } from '../utils/feedback';
+import { DecryptedText, ShinyText } from '../components/ui/ReactBits';
 
 // --- Stylized Initials Avatar Component ---
 
@@ -193,10 +194,7 @@ function LobbyPhase({ roomCode, playerList, isHost, settings, totalPlayers, mafi
           ) : (
             playerList.map((p, idx) => (
               <div key={idx} className="flex items-center justify-between bg-white/5 rounded-lg p-3 border border-white/5 animate-in slide-in-from-bottom duration-300">
-                <div className="flex items-center gap-3">
-                  <Avatar name={p.name} />
-                  <span className="font-semibold">{p.name}</span>
-                </div>
+                <span className="font-semibold">{p.name}</span>
                 {p.isHost && (
                   <span className="text-xs bg-brand-secondary/20 text-brand-secondary px-2 py-1 rounded-full uppercase font-bold tracking-wider">
                     Host
@@ -299,7 +297,9 @@ function CountdownPhase() {
 
   return (
     <Card className="flex flex-col items-center justify-center py-20 space-y-6 text-center animate-in fade-in zoom-in duration-300">
-      <h2 className="text-xl uppercase tracking-widest text-brand-offwhite/60">Game Starting</h2>
+      <h2 className="text-xl uppercase tracking-widest text-brand-offwhite/60">
+        <DecryptedText text="Game Starting" />
+      </h2>
       <div className="text-8xl font-black font-mono text-brand-secondary animate-bounce">
         {count > 0 ? count : 'GO!'}
       </div>
@@ -311,26 +311,13 @@ function CountdownPhase() {
 function RevealPhase({ roomState, playerId, players, isHost, advancePhase }) {
   const self = players[playerId] || {};
   const isMafia = self.role === 'mafia';
-  const [showRole, setShowRole] = useState(false);
-  const [hasSeenHint, setHasSeenHint] = useState(() => {
-    return localStorage.getItem('hasSeenRoleRevealHint') === 'true';
-  });
+  const [showRole, setShowRole] = useState(true);
 
-  const handleRevealToggle = () => {
-    const nextShow = !showRole;
-    setShowRole(nextShow);
-    
-    // Play role specific arpeggio / suspension chord and vibrate on reveal
-    if (nextShow) {
-      playSound(isMafia ? 'reveal_mafia' : 'reveal_civilian', roomState.settings?.soundEnabled);
-      triggerVibrate(isMafia ? [200, 100, 200] : [100, 50, 100]);
-    }
-
-    if (!hasSeenHint) {
-      setHasSeenHint(true);
-      localStorage.setItem('hasSeenRoleRevealHint', 'true');
-    }
-  };
+  // Play arpeggio and vibrate immediately when reveal screen mounts
+  useEffect(() => {
+    playSound(isMafia ? 'reveal_mafia' : 'reveal_civilian', roomState.settings?.soundEnabled);
+    triggerVibrate(isMafia ? [200, 100, 200] : [100, 50, 100]);
+  }, [isMafia, roomState.settings?.soundEnabled]);
 
   const fellowMafia = Object.entries(players)
     .filter(([id, p]) => id !== playerId && p.role === 'mafia')
@@ -339,27 +326,11 @@ function RevealPhase({ roomState, playerId, players, isHost, advancePhase }) {
   return (
     <div className="space-y-6 animate-in fade-in zoom-in duration-300">
       <Card className="flex flex-col items-center justify-center py-10 space-y-6 text-center relative overflow-hidden min-h-[300px]">
-        {!showRole ? (
-          <>
-            <h2 className="text-2xl font-bold uppercase tracking-wide">Your Secret Role</h2>
-            <button
-              onClick={handleRevealToggle}
-              className="w-24 h-24 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-brand-secondary hover:bg-white/10 transition-all active:scale-95 shadow-lg"
-            >
-              <Eye className="h-10 w-10" />
-            </button>
-            <p className="text-xs text-brand-offwhite/50 max-w-[200px]">
-              Tap card to keep viewing. Only you can see this!
-            </p>
-            {!hasSeenHint && (
-              <span className="text-xs text-brand-secondary animate-pulse absolute bottom-4">
-                * Click to view role
-              </span>
-            )}
-          </>
-        ) : (
+        {showRole ? (
           <div className="space-y-6 animate-in fade-in duration-300 w-full px-4">
-            <h2 className="text-2xl font-bold uppercase tracking-wide">You Are A</h2>
+            <h2 className="text-2xl font-bold uppercase tracking-wide">
+              <DecryptedText text="You Are A" />
+            </h2>
             
             {isMafia ? (
               <div className="space-y-4">
@@ -384,10 +355,29 @@ function RevealPhase({ roomState, playerId, players, isHost, advancePhase }) {
               </div>
             )}
 
-            <Button variant="ghost" size="sm" onClick={() => setShowRole(false)} className="gap-2">
+            <Button variant="ghost" size="sm" onClick={() => setShowRole(false)} className="gap-2 mx-auto">
               <EyeOff className="h-4 w-4" /> Hide Role
             </Button>
           </div>
+        ) : (
+          <>
+            <h2 className="text-2xl font-bold uppercase tracking-wide">
+              <DecryptedText text="Your Secret Role" />
+            </h2>
+            <button
+              onClick={() => {
+                setShowRole(true);
+                playSound(isMafia ? 'reveal_mafia' : 'reveal_civilian', roomState.settings?.soundEnabled);
+                triggerVibrate(isMafia ? [200, 100, 200] : [100, 50, 100]);
+              }}
+              className="w-24 h-24 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-brand-secondary hover:bg-white/10 transition-all active:scale-95 shadow-lg"
+            >
+              <Eye className="h-10 w-10" />
+            </button>
+            <p className="text-xs text-brand-offwhite/50 max-w-[200px]">
+              Tap card to view your role again.
+            </p>
+          </>
         )}
       </Card>
 
@@ -411,7 +401,7 @@ function DiscussionPhase({ roomState, isHost, advancePhase }) {
     <div className="space-y-6 animate-in fade-in zoom-in duration-300">
       <Card className="text-center p-6 space-y-4">
         <h2 className="text-sm font-semibold text-brand-secondary tracking-widest uppercase">
-          Round {roomState.currentRound + 1} Discussion
+          <DecryptedText text={`Round ${roomState.currentRound + 1} Discussion`} />
         </h2>
         
         {roomState.settings?.discussionUnlimited ? (
@@ -471,7 +461,7 @@ function VotingPhase({ roomState, playerId, players, isHost, castVote, endVoting
     <div className="space-y-5 animate-in fade-in zoom-in duration-300">
       <Card className="text-center p-4 space-y-2">
         <h2 className="text-sm font-semibold text-brand-secondary tracking-widest uppercase">
-          Round {roomState.currentRound + 1} Voting
+          <DecryptedText text={`Round ${roomState.currentRound + 1} Voting`} />
         </h2>
         {roomState.settings?.votingUnlimited ? (
           <p className="text-xs text-brand-offwhite/50">Host will resolve voting manually.</p>
@@ -505,8 +495,7 @@ function VotingPhase({ roomState, playerId, players, isHost, castVote, endVoting
                     : 'bg-white/5 border-white/5'
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <Avatar name={p.name} />
+                <div className="flex items-center">
                   <div className="flex flex-col">
                     <span className="font-semibold text-lg flex items-center gap-1.5">
                       {p.name} {isSelf && "(You)"}
@@ -638,7 +627,7 @@ function GameOverPhase({ roomState, isHost, players, resetGame }) {
       <Card className="text-center py-10 space-y-4 flex flex-col items-center justify-center">
         <Award className="h-16 w-16 text-brand-secondary animate-bounce" />
         <h2 className="text-4xl font-black uppercase tracking-wide text-brand-offwhite">
-          {won}
+          <ShinyText text={won} speed={3} />
         </h2>
         <p className="text-xs text-brand-offwhite/50">Game Over — Cells Revealed</p>
       </Card>
@@ -740,8 +729,10 @@ export default function Lobby() {
     }, 250);
   };
 
+  const showHostHeader = isHost && roomState.phase !== 'lobby';
+
   return (
-    <div className="relative">
+    <div className="relative space-y-4">
       {/* ⚠️ Full Screen overlay when socket disconnects */}
       {!socketConnected && (
         <div className="fixed inset-0 bg-brand-base/90 backdrop-blur-md z-50 flex flex-col items-center justify-center text-center space-y-4 animate-in fade-in duration-300">
@@ -753,6 +744,29 @@ export default function Lobby() {
             <p className="text-sm text-brand-offwhite/60 max-w-[250px]">
               Reconnecting to game server... Your seat and role are saved.
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* 🛠️ Persistent Host Control Header */}
+      {showHostHeader && (
+        <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-xl p-3 animate-in slide-in-from-top duration-300">
+          <span className="text-xs font-black text-brand-secondary tracking-widest uppercase">
+            Host Controls
+          </span>
+          <div className="flex gap-2">
+            <button
+              onClick={resetGame}
+              className="px-2.5 py-1.5 rounded-lg bg-white/5 text-xs font-bold text-brand-offwhite hover:bg-white/10 border border-white/5 flex items-center gap-1 active:scale-95 transition-all"
+            >
+              <RefreshCw className="h-3 w-3" /> Reset
+            </button>
+            <button
+              onClick={() => navigate('/')}
+              className="px-2.5 py-1.5 rounded-lg bg-brand-primary/20 text-xs font-bold text-brand-primary hover:bg-brand-primary/30 border border-brand-primary/10 flex items-center gap-1 active:scale-95 transition-all"
+            >
+              <LogOut className="h-3 w-3" /> Exit
+            </button>
           </div>
         </div>
       )}
