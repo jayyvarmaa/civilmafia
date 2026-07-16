@@ -3,7 +3,7 @@ const ASSETS = [
   '/',
   '/index.html',
   '/manifest.webmanifest',
-  '/favicon.svg'
+  '/logo.webp'
 ];
 
 self.addEventListener('install', (e) => {

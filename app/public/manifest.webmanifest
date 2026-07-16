@@ -3,9 +3,9 @@
   "name": "Sleeper Cell deduction game",
   "icons": [
     {
-      "src": "favicon.svg",
-      "type": "image/svg+xml",
-      "sizes": "any"
+      "src": "logo.webp",
+      "type": "image/webp",
+      "sizes": "512x512"
     }
   ],
   "start_url": "/",
