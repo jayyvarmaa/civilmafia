@@ -554,3 +554,30 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`[SERVER] Listening on port ${PORT}`);
 });
+
+// Auto-cleanup rooms older than 6 hours every hour
+setInterval(async () => {
+  console.log('[CLEANUP] Running hourly database cleanup for inactive rooms...');
+  try {
+    const threshold = new Date(Date.now() - 6 * 60 * 60 * 1000); // 6 hours ago
+    
+    // Fetch rooms to delete
+    const roomsToDelete = await pool.query(
+      `SELECT room_code FROM rooms WHERE created_at < $1`,
+      [threshold]
+    );
+    
+    if (roomsToDelete.rows.length > 0) {
+      const codes = roomsToDelete.rows.map(r => r.room_code);
+      console.log(`[CLEANUP] Found ${codes.length} expired rooms. Cleaning up:`, codes);
+      
+      // Cascade delete takes care of players and elimination_history automatically
+      await pool.query(`DELETE FROM rooms WHERE room_code = ANY($1)`, [codes]);
+      
+      console.log(`[CLEANUP] Expired rooms successfully deleted.`);
+    }
+  } catch (err) {
+    console.error('[CLEANUP] Error during room cleanup:', err.message);
+  }
+}, 60 * 60 * 1000); // every 1 hour
+
