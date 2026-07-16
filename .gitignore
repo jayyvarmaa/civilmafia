@@ -22,3 +22,6 @@ Thumbs.db
 
 # Docker/postgres local files (just in case)
 pgdata/
+
+# Game documents
+docs/
