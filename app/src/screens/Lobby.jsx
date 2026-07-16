@@ -315,7 +315,7 @@ function RevealPhase({ roomState, playerId, players, isHost, advancePhase }) {
 
   // Play arpeggio and vibrate immediately when reveal screen mounts
   useEffect(() => {
-    playSound(isMafia ? 'reveal_mafia' : 'reveal_civilian', roomState.settings?.soundEnabled);
+    playSound('reveal', roomState.settings?.soundEnabled);
     triggerVibrate(isMafia ? [200, 100, 200] : [100, 50, 100]);
   }, [isMafia, roomState.settings?.soundEnabled]);
 
@@ -367,7 +367,6 @@ function RevealPhase({ roomState, playerId, players, isHost, advancePhase }) {
             <button
               onClick={() => {
                 setShowRole(true);
-                playSound(isMafia ? 'reveal_mafia' : 'reveal_civilian', roomState.settings?.soundEnabled);
                 triggerVibrate(isMafia ? [200, 100, 200] : [100, 50, 100]);
               }}
               className="w-24 h-24 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-brand-secondary hover:bg-white/10 transition-all active:scale-95 shadow-lg"

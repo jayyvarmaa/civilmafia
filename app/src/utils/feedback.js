@@ -34,33 +34,19 @@ export const playSound = (type, enabled = true) => {
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
       osc.start();
       osc.stop(ctx.currentTime + 0.08);
-    } else if (type === 'reveal_civilian') {
-      // Pleasant Major arpeggio (transposed for mobile audibility)
-      [392.00, 493.88, 587.33, 783.99].forEach((f, i) => {
+    } else if (type === 'reveal_civilian' || type === 'reveal_mafia' || type === 'reveal') {
+      // Mysterious, loud role reveal arpeggio (gain 0.18)
+      [440.00, 554.37, 659.25, 880.00].forEach((f, i) => {
         const o = ctx.createOscillator();
         const g = ctx.createGain();
         o.type = 'triangle';
         o.connect(g);
         g.connect(ctx.destination);
-        o.frequency.setValueAtTime(f, ctx.currentTime + i * 0.08);
-        g.gain.setValueAtTime(0.04, ctx.currentTime + i * 0.08);
-        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.08 + 0.25);
-        o.start(ctx.currentTime + i * 0.08);
-        o.stop(ctx.currentTime + i * 0.08 + 0.25);
-      });
-    } else if (type === 'reveal_mafia') {
-      // Ominous minor/dissonant chord (transposed up to G4, G#4, B4 for phone speaker audibility)
-      [392.00, 415.30, 493.88].forEach((f, i) => {
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
-        o.type = 'triangle';
-        o.connect(g);
-        g.connect(ctx.destination);
-        o.frequency.setValueAtTime(f, ctx.currentTime);
-        g.gain.setValueAtTime(0.05, ctx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
-        o.start();
-        o.stop(ctx.currentTime + 0.5);
+        o.frequency.setValueAtTime(f, ctx.currentTime + i * 0.10);
+        g.gain.setValueAtTime(0.18, ctx.currentTime + i * 0.10);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.10 + 0.35);
+        o.start(ctx.currentTime + i * 0.10);
+        o.stop(ctx.currentTime + i * 0.10 + 0.35);
       });
     } else if (type === 'vote') {
       osc.frequency.setValueAtTime(440, ctx.currentTime);
