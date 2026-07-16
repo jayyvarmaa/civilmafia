@@ -97,8 +97,18 @@ export default function Lobby() {
     );
   }
 
+  const [localSettings, setLocalSettings] = React.useState(null);
+  const debounceTimeoutRef = React.useRef(null);
+
+  // Sync localSettings with incoming roomState updates
+  useEffect(() => {
+    if (roomState?.settings) {
+      setLocalSettings(roomState.settings);
+    }
+  }, [roomState?.settings]);
+
   const playerList = Object.values(players || {});
-  const settings = roomState.settings || {};
+  const settings = localSettings || roomState.settings || {};
 
   // Validate mafia count: 1 ≤ mafiaCount < totalPlayers
   const totalPlayers = settings.totalPlayers || 5;
@@ -113,7 +123,16 @@ export default function Lobby() {
       updated.mafiaCount = Math.max(1, value - 1);
     }
 
-    updateSettings(updated);
+    // 1. Update UI state instantly
+    setLocalSettings(updated);
+
+    // 2. Debounce database/socket update to prevent lag
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+    debounceTimeoutRef.current = setTimeout(() => {
+      updateSettings(updated);
+    }, 250);
   };
   
   const handleStartGame = () => {
