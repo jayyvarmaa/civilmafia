@@ -92,3 +92,29 @@ export const triggerVibrate = (pattern = 100) => {
     console.warn('Vibration API not supported:', e.message);
   }
 };
+
+// Unlock Audio Context on first user gesture
+export const initializeAudio = () => {
+  const init = () => {
+    const ctx = getAudioContext();
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
+    // Play a silent oscillator to permanently unlock the audio engine
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    gain.gain.value = 0;
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.1);
+    
+    // Remove listeners once unlocked
+    window.removeEventListener('click', init);
+    window.removeEventListener('touchstart', init);
+  };
+
+  window.addEventListener('click', init, { once: true });
+  window.addEventListener('touchstart', init, { once: true });
+};
+
