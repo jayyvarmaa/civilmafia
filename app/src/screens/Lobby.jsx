@@ -625,8 +625,8 @@ function GameOverPhase({ roomState, isHost, players, resetGame }) {
     <div className="space-y-6 animate-in fade-in zoom-in duration-300">
       <Card className="text-center py-10 space-y-4 flex flex-col items-center justify-center">
         <Award className="h-16 w-16 text-brand-secondary animate-bounce" />
-        <h2 className="text-4xl font-black uppercase tracking-wide text-brand-offwhite">
-          <ShinyText text={won} speed={3} />
+        <h2 className="text-4xl font-black uppercase tracking-wide text-brand-secondary drop-shadow-[0_0_12px_rgba(255,77,0,0.4)] animate-pulse">
+          {won}
         </h2>
         <p className="text-xs text-brand-offwhite/50">Game Over — Cells Revealed</p>
       </Card>
