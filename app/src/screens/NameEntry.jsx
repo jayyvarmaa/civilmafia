@@ -5,6 +5,7 @@ import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
 import { useGame } from '../context/GameContext';
 import { User } from 'lucide-react';
+import { DecryptedText } from '../components/ui/ReactBits';
 
 export default function NameEntry() {
   const [searchParams] = useSearchParams();
@@ -39,7 +40,9 @@ export default function NameEntry() {
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
       <Card className="flex flex-col space-y-6">
         <div className="text-center space-y-2">
-          <h2 className="text-2xl font-bold uppercase tracking-wide">Who are you?</h2>
+          <h2 className="text-2xl font-bold uppercase tracking-wide">
+            <DecryptedText text="Who are you?" />
+          </h2>
           <p className="text-sm text-brand-offwhite/60">
             {code ? `Enter your name to join room ${code}` : 'Enter your name to join the game.'}
           </p>
