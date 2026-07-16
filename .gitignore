@@ -42,4 +42,10 @@ server/.env
 app/.env
 *.local
 
+# Vercel and build caches
+.vercel/
+.next/
+.npm/
+
+
 
