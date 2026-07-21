@@ -152,11 +152,17 @@ export default function JoinRoom() {
   const handleQRScan = (scannedCode) => {
     setShowScanner(false);
     setCode(scannedCode);
-    // Auto-join after scanning
+    
     if (playerName) {
       setLoading(true);
       joinRoom(scannedCode, playerName)
-        .then(() => navigate(`/lobby/${scannedCode}`, { replace: true }))
+        .then(() => {
+          // Wait 1 second as requested, then force a hard page reload to the lobby
+          // This ensures the camera stream and hardware locks are completely flushed
+          setTimeout(() => {
+            window.location.href = `/lobby/${scannedCode}`;
+          }, 1000);
+        })
         .catch((err) => {
           setError(err.message || 'Failed to join room.');
           setLoading(false);
