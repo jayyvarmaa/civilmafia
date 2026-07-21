@@ -224,6 +224,7 @@ export const GameProvider = ({ children }) => {
     createRoom,
     joinRoom,
     updateSettings,
+    setRoomCode,
     setIsHost,
     saveName,
     startGame,

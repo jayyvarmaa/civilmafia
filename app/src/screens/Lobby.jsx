@@ -682,18 +682,26 @@ export default function Lobby() {
   const { 
     roomState, players, isHost, playerId, updateSettings, 
     startGame, advancePhase, castVote, endVoting, resetGame,
-    kickPlayer, socketConnected, joinRoom
+    kickPlayer, socketConnected, joinRoom, setRoomCode
   } = useGame();
 
   const [localSettings, setLocalSettings] = React.useState(null);
   const debounceTimeoutRef = React.useRef(null);
+  const hasAttemptedJoin = React.useRef(false);
 
   // Auto-rejoin if page is reloaded and state is lost
   useEffect(() => {
-    if (!roomState && playerId && roomCode) {
-      joinRoom(roomCode).catch(() => navigate('/join'));
+    if (!roomState && playerId && roomCode && !hasAttemptedJoin.current) {
+      hasAttemptedJoin.current = true;
+      setRoomCode(roomCode); // Ensure socket attempts to join even if fetch fails
+      joinRoom(roomCode).catch((err) => {
+        if (err.message === 'Room not found') {
+          navigate('/join');
+        }
+        // If it's a network error, we rely on the socket auto-reconnect to restore state
+      });
     }
-  }, [roomState, playerId, roomCode, joinRoom, navigate]);
+  }, [roomState, playerId, roomCode, joinRoom, navigate, setRoomCode]);
 
   // Sync localSettings with incoming roomState updates
   useEffect(() => {
