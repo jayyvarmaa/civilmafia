@@ -402,7 +402,7 @@ io.on('connection', (socket) => {
     if (roomPlayers && roomPlayers.has(playerId)) {
       const p = roomPlayers.get(playerId);
       p.voted_for = votedForId;
-      p.has_voted = true;
+      p.has_voted = votedForId !== null;
       broadcastRoomState(roomCode);
     }
   });
