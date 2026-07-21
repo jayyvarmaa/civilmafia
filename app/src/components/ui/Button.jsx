@@ -8,10 +8,10 @@ export function cn(...inputs) {
 
 export function Button({ className, variant = 'primary', size = 'default', type = 'button', ...props }) {
   const variants = {
-    primary: 'bg-brand-secondary text-brand-offwhite hover:bg-opacity-90 active:scale-95',
-    danger: 'bg-brand-primary text-brand-offwhite hover:bg-opacity-90 active:scale-95',
-    outline: 'border-2 border-brand-surface bg-transparent text-brand-offwhite hover:bg-brand-surface active:scale-95',
-    ghost: 'bg-transparent text-brand-offwhite hover:bg-brand-surface active:scale-95'
+    primary: 'bg-brand-offwhite text-brand-base hover:bg-opacity-90 active:scale-95 shadow-lg shadow-white/5',
+    danger: 'bg-brand-primary text-brand-offwhite hover:bg-opacity-90 active:scale-95 shadow-lg shadow-brand-primary/20',
+    outline: 'border-2 border-brand-offwhite/20 bg-transparent text-brand-offwhite hover:bg-brand-offwhite/10 active:scale-95',
+    ghost: 'bg-transparent text-brand-offwhite hover:bg-brand-offwhite/10 active:scale-95'
   }
   const sizes = {
     default: 'h-12 px-6 py-2 text-lg',

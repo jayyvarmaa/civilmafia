@@ -142,7 +142,7 @@ export function AsciiText({ text = "ASCII", className = "" }) {
       </div>
       {/* Glitch / Offset Layer 2 */}
       <div
-        className="absolute inset-0 text-brand-primary opacity-70 pointer-events-none mix-blend-screen font-black tracking-widest font-mono text-center drop-shadow-[0_0_10px_rgba(201,5,17,0.8)]"
+        className="absolute inset-0 text-brand-secondary opacity-70 pointer-events-none mix-blend-screen font-black tracking-widest font-mono text-center drop-shadow-[0_0_10px_rgba(255,169,2,0.8)]"
         style={{ transform: `translate(${-offset.x}px, ${-offset.y}px)` }}
       >
         {text}
