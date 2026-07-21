@@ -228,14 +228,6 @@ function LobbyPhase({ roomCode, playerList, isHost, playerId, kickPlayer, settin
 
           <div className="space-y-4">
             <Stepper
-              label="Total Players"
-              value={totalPlayers}
-              onChange={(v) => handleSettingChange('totalPlayers', v)}
-              min={2}
-              max={20}
-            />
-
-            <Stepper
               label="Mafia Count"
               value={mafiaCount}
               onChange={(v) => handleSettingChange('mafiaCount', v)}
@@ -722,16 +714,12 @@ export default function Lobby() {
   const playerList = Object.values(players || {});
   const settings = localSettings || roomState.settings || {};
 
-  const totalPlayers = settings.totalPlayers || 5;
-  const mafiaCount = settings.mafiaCount || 1;
+  const totalPlayers = playerList.length;
   const maxMafia = Math.max(1, totalPlayers - 1);
+  const mafiaCount = Math.min(settings.mafiaCount || 1, maxMafia);
 
   const handleSettingChange = (key, value) => {
     const updated = { ...settings, [key]: value };
-
-    if (key === 'totalPlayers' && updated.mafiaCount >= value) {
-      updated.mafiaCount = Math.max(1, value - 1);
-    }
 
     setLocalSettings(updated);
 
