@@ -27,7 +27,7 @@ export default function Landing() {
   return (
     <div className="flex flex-col items-center justify-center space-y-8 animate-in fade-in zoom-in duration-500">
       <div className="text-center space-y-4">
-        <h1 className="text-6xl font-black tracking-tighter uppercase drop-shadow-lg">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter uppercase drop-shadow-lg w-full max-w-full overflow-visible whitespace-nowrap">
           <AsciiText text="Sleeper Cell" className="text-brand-primary" />
         </h1>
         <p className="text-lg text-brand-offwhite/80">
