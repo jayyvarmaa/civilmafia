@@ -616,7 +616,6 @@ function GameOverPhase({ roomState, isHost, players, resetGame }) {
   const navigate = useNavigate();
   const playerList = Object.values(players || {});
   const isCivWin = roomState.winner === 'civilians';
-  const wonText = isCivWin ? 'Civilians Win' : 'Mafia';
 
   // Trigger arpeggio on render
   useEffect(() => {
@@ -628,8 +627,15 @@ function GameOverPhase({ roomState, isHost, players, resetGame }) {
     <div className="space-y-6 animate-in fade-in zoom-in duration-300">
       <Card className="text-center py-10 space-y-4 flex flex-col items-center justify-center">
         <Award className={`h-16 w-16 animate-bounce ${isCivWin ? 'text-brand-secondary' : 'text-brand-primary'}`} />
-        <h2 className={`text-5xl font-black uppercase tracking-wide drop-shadow-md animate-pulse ${isCivWin ? 'text-brand-secondary' : 'text-brand-primary'}`}>
-          {wonText}
+        <h2 className={`text-5xl font-black uppercase tracking-wide drop-shadow-md animate-pulse ${isCivWin ? 'text-brand-secondary' : ''}`}>
+          {isCivWin ? (
+            'Civilians Win'
+          ) : (
+            <>
+              <span className="text-brand-primary">Mafia</span>{' '}
+              <span className="text-brand-secondary">Wins</span>
+            </>
+          )}
         </h2>
         <p className="text-xs text-brand-offwhite/50">Game Over — Roles Revealed</p>
       </Card>
