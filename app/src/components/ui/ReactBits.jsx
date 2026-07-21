@@ -128,27 +128,27 @@ export function AsciiText({ text = "ASCII", className = "" }) {
   }, []);
 
   return (
-    <div className={`relative inline-block ${className}`}>
+    <div className={`relative inline-block whitespace-nowrap ${className}`}>
       {/* Base Layer */}
-      <div className="text-brand-offwhite opacity-20 filter blur-[2px] pointer-events-none absolute inset-0">
+      <div className="text-brand-offwhite opacity-20 filter blur-[2px] pointer-events-none absolute inset-0 font-black tracking-widest font-mono text-center">
         {text}
       </div>
       {/* Glitch / Offset Layer 1 */}
       <div
-        className="absolute inset-0 text-brand-secondary opacity-70 pointer-events-none mix-blend-screen font-black tracking-widest drop-shadow-[0_0_10px_rgba(255,169,2,0.8)]"
+        className="absolute inset-0 text-brand-secondary opacity-70 pointer-events-none mix-blend-screen font-black tracking-widest font-mono text-center drop-shadow-[0_0_10px_rgba(255,169,2,0.8)]"
         style={{ transform: `translate(${offset.x}px, ${offset.y}px)` }}
       >
         {text}
       </div>
       {/* Glitch / Offset Layer 2 */}
       <div
-        className="absolute inset-0 text-brand-primary opacity-70 pointer-events-none mix-blend-screen font-black tracking-widest drop-shadow-[0_0_10px_rgba(201,5,17,0.8)]"
+        className="absolute inset-0 text-brand-primary opacity-70 pointer-events-none mix-blend-screen font-black tracking-widest font-mono text-center drop-shadow-[0_0_10px_rgba(201,5,17,0.8)]"
         style={{ transform: `translate(${-offset.x}px, ${-offset.y}px)` }}
       >
         {text}
       </div>
       {/* Main Text */}
-      <div className="relative z-10 text-brand-offwhite font-black tracking-widest font-mono">
+      <div className="relative z-10 text-brand-offwhite font-black tracking-widest font-mono text-center">
         {text}
       </div>
     </div>
