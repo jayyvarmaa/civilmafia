@@ -346,13 +346,15 @@ function RevealPhase({ roomState, playerId, players, isHost, advancePhase }) {
                 )}
               </div>
             ) : (
-              <div className="text-center py-10 space-y-4">
-            <Eye className="h-12 w-12 mx-auto text-brand-primary" />
-            <div className="space-y-2">
-              <h3 className="text-xl font-bold uppercase tracking-wider text-brand-primary">You are a Civilian</h3>
-              <p className="text-sm text-brand-offwhite/60">Find the hidden mafia and vote them out.</p>
-            </div>
-          </div>  )}
+              <div className="space-y-4">
+                <div className="text-5xl font-black text-brand-secondary tracking-wide uppercase drop-shadow-md">
+                  Civilian
+                </div>
+                <div className="p-3 bg-brand-secondary/10 border border-brand-secondary/20 rounded-xl text-sm">
+                  <p className="text-brand-offwhite/60">Find the hidden mafia and vote them out.</p>
+                </div>
+              </div>
+            )}
 
             <Button variant="ghost" size="sm" onClick={() => setShowRole(false)} className="gap-2 mx-auto">
               <EyeOff className="h-4 w-4" /> Hide Role
