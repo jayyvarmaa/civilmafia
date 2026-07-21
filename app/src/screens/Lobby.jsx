@@ -702,7 +702,6 @@ export default function Lobby() {
       joinRoom(roomCode, playerId).catch(() => navigate('/join'));
     }
   }, [roomState, playerId, roomCode, joinRoom, navigate]);
-  const debounceTimeoutRef = React.useRef(null);
 
   // Sync localSettings with incoming roomState updates
   useEffect(() => {
