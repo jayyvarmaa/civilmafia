@@ -699,7 +699,7 @@ export default function Lobby() {
   // Auto-rejoin if page is reloaded and state is lost
   useEffect(() => {
     if (!roomState && playerId && roomCode) {
-      joinRoom(roomCode, playerId).catch(() => navigate('/join'));
+      joinRoom(roomCode).catch(() => navigate('/join'));
     }
   }, [roomState, playerId, roomCode, joinRoom, navigate]);
 
