@@ -70,7 +70,7 @@ export const GameProvider = ({ children }) => {
 
   // Handle Socket events — listen for room state updates
   useEffect(() => {
-    if (!socket || !roomCode) return;
+    if (!socket || !roomCode || !socketConnected) return;
     
     console.log(`[SOCKET_EMIT] Joining socket room: ${roomCode}`);
     socket.emit('join_room', { roomCode, playerId });
@@ -90,12 +90,21 @@ export const GameProvider = ({ children }) => {
       }
     };
 
+    const handleKicked = () => {
+      console.log(`[SOCKET_KICKED] You were kicked from the room`);
+      setRoomCode(null);
+      setRoomState(null);
+      window.location.href = '/'; // Redirect to home if kicked
+    };
+
     socket.on('roomStateUpdate', handleRoomState);
+    socket.on('kicked', handleKicked);
 
     return () => {
       socket.off('roomStateUpdate', handleRoomState);
+      socket.off('kicked', handleKicked);
     };
-  }, [socket, roomCode, playerId]);
+  }, [socket, roomCode, playerId, socketConnected]);
 
   // Create room — server auto-adds host as player
   const createRoom = async () => {
@@ -197,6 +206,13 @@ export const GameProvider = ({ children }) => {
     }
   };
 
+  const kickPlayer = (targetPlayerId) => {
+    if (socket && roomCode && isHost) {
+      console.log(`[SOCKET_EMIT] kick_player -> ${targetPlayerId}`);
+      socket.emit('kick_player', { roomCode, playerId, targetPlayerId });
+    }
+  };
+
   const value = {
     roomCode,
     players,
@@ -215,6 +231,7 @@ export const GameProvider = ({ children }) => {
     castVote,
     endVoting,
     resetGame,
+    kickPlayer,
     socketConnected
   };
 

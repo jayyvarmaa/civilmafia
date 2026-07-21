@@ -7,11 +7,11 @@ export default {
   theme: {
     extend: {
       colors: {
-        'brand-base': '#272121',
-        'brand-surface': '#443737',
-        'brand-primary': '#FF0000',
-        'brand-secondary': '#FF4D00',
-        'brand-offwhite': '#F2EFE9',
+        'brand-base': '#0c0002',
+        'brand-surface': '#490206',
+        'brand-primary': '#c90511',
+        'brand-secondary': '#ffa902',
+        'brand-offwhite': '#fafafa',
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],

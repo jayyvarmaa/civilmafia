@@ -167,7 +167,7 @@ function ActiveTimer({ targetTime, label = "Time Remaining", soundEnabled = true
 
 // --- Dynamic Phase Views ---
 
-function LobbyPhase({ roomCode, playerList, isHost, settings, totalPlayers, mafiaCount, maxMafia, handleSettingChange, startGame }) {
+function LobbyPhase({ roomCode, playerList, isHost, playerId, kickPlayer, settings, totalPlayers, mafiaCount, maxMafia, handleSettingChange, startGame }) {
   return (
     <div className="space-y-5 animate-in fade-in zoom-in duration-300">
       {/* Room Code + QR Code */}
@@ -195,11 +195,22 @@ function LobbyPhase({ roomCode, playerList, isHost, settings, totalPlayers, mafi
             playerList.map((p, idx) => (
               <div key={idx} className="flex items-center justify-between bg-white/5 rounded-lg p-3 border border-white/5 animate-in slide-in-from-bottom duration-300">
                 <span className="font-semibold">{p.name}</span>
-                {p.isHost && (
-                  <span className="text-xs bg-brand-secondary/20 text-brand-secondary px-2 py-1 rounded-full uppercase font-bold tracking-wider">
-                    Host
-                  </span>
-                )}
+                <div className="flex items-center gap-2">
+                  {p.isHost && (
+                    <span className="text-xs bg-brand-secondary/20 text-brand-secondary px-2 py-1 rounded-full uppercase font-bold tracking-wider">
+                      Host
+                    </span>
+                  )}
+                  {isHost && !p.isHost && (
+                    <button
+                      onClick={() => kickPlayer(p.player_id)}
+                      className="p-1 rounded bg-red-500/20 text-red-400 hover:bg-red-500/40 transition-colors"
+                      title="Kick Player"
+                    >
+                      <LogOut className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
               </div>
             ))
           )}
@@ -343,13 +354,13 @@ function RevealPhase({ roomState, playerId, players, isHost, advancePhase }) {
                 )}
               </div>
             ) : (
-              <div className="space-y-2">
-                <div className="text-5xl font-black text-brand-secondary tracking-wide uppercase drop-shadow-md">
-                  Civilian
-                </div>
-                <p className="text-sm text-brand-offwhite/60">Find the hidden sleeper cells and vote them out.</p>
-              </div>
-            )}
+              <div className="text-center py-10 space-y-4">
+            <Eye className="h-12 w-12 mx-auto text-brand-primary" />
+            <div className="space-y-2">
+              <h3 className="text-xl font-bold uppercase tracking-wider text-brand-primary">You are a Civilian</h3>
+              <p className="text-sm text-brand-offwhite/60">Find the hidden mafia and vote them out.</p>
+            </div>
+          </div>  )}
 
             <Button variant="ghost" size="sm" onClick={() => setShowRole(false)} className="gap-2 mx-auto">
               <EyeOff className="h-4 w-4" /> Hide Role
@@ -460,7 +471,7 @@ function VotingPhase({ roomState, playerId, players, isHost, castVote, endVoting
     <div className="space-y-5 animate-in fade-in zoom-in duration-300">
       <Card className="text-center p-4 space-y-2">
         <h2 className="text-sm font-semibold text-brand-secondary tracking-widest uppercase">
-          <DecryptedText text={`Round ${roomState.currentRound + 1} Voting`} />
+          <DecryptedText text={`Round ${(roomState.current_round || 0) + 1} Voting`} />
         </h2>
         {roomState.settings?.votingUnlimited ? (
           <p className="text-xs text-brand-offwhite/50">Host will resolve voting manually.</p>
@@ -503,9 +514,6 @@ function VotingPhase({ roomState, playerId, players, isHost, castVote, endVoting
                           Voted
                         </span>
                       )}
-                    </span>
-                    <span className="text-xs text-brand-offwhite/50">
-                      Votes against: {voteTallies[p.id] || 0}
                     </span>
                   </div>
                 </div>
@@ -612,8 +620,8 @@ function EliminationRevealPhase({ roomState, playerId, players, isHost, advanceP
 
 function GameOverPhase({ roomState, isHost, players, resetGame }) {
   const navigate = useNavigate();
-  const history = roomState.eliminationHistory || [];
-  const won = roomState.winner === 'civilians' ? 'Civilians Win' : 'Sleeper Cells Win';
+  const playerList = Object.values(players || {});
+  const won = roomState.winner === 'civilians' ? 'Civilians Win' : 'Mafia Wins';
 
   // Trigger arpeggio on render
   useEffect(() => {
@@ -628,30 +636,30 @@ function GameOverPhase({ roomState, isHost, players, resetGame }) {
         <h2 className="text-4xl font-black uppercase tracking-wide text-brand-secondary drop-shadow-[0_0_12px_rgba(255,77,0,0.4)] animate-pulse">
           {won}
         </h2>
-        <p className="text-xs text-brand-offwhite/50">Game Over — Cells Revealed</p>
+        <p className="text-xs text-brand-offwhite/50">Game Over — Roles Revealed</p>
       </Card>
 
-      {/* Recap Timeline */}
-      {history.length > 0 && (
-        <Card className="p-4 space-y-3">
-          <h3 className="font-semibold border-b border-white/10 pb-2 text-sm uppercase tracking-wider text-brand-offwhite/70">
-            Game Recap
-          </h3>
-          <div className="space-y-3 text-sm">
-            {history.map((h, idx) => {
-              const name = players[h.eliminated_player_id]?.name || 'Unknown';
-              return (
-                <div key={idx} className="flex items-center justify-between">
-                  <span className="text-brand-offwhite/50">Round {h.round}:</span>
-                  <span className="font-medium text-brand-offwhite">
-                    {name} ({h.eliminated_role})
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </Card>
-      )}
+      {/* Players List Recap */}
+      <Card className="p-4 space-y-3">
+        <h3 className="font-semibold border-b border-white/10 pb-2 text-sm uppercase tracking-wider text-brand-offwhite/70">
+          Players
+        </h3>
+        <div className="space-y-2">
+          {playerList.map((p, idx) => (
+            <div key={idx} className={`flex items-center justify-between p-3 rounded-lg border ${p.isAlive ? 'bg-white/10 border-white/20' : 'bg-red-500/10 border-red-500/20'} animate-in slide-in-from-bottom duration-300`}>
+              <div className="flex flex-col">
+                <span className="font-semibold">{p.name}</span>
+                <span className={`text-xs uppercase tracking-wider font-bold ${p.role === 'mafia' ? 'text-brand-primary' : 'text-brand-offwhite/60'}`}>
+                  {p.role === 'mafia' ? 'Mafia' : 'Civilian'}
+                </span>
+              </div>
+              <span className={`text-xs uppercase tracking-wider font-bold ${p.isAlive ? 'text-green-400' : 'text-red-400'}`}>
+                {p.isAlive ? 'Alive' : 'Eliminated'}
+              </span>
+            </div>
+          ))}
+        </div>
+      </Card>
 
       {/* Host Controls */}
       {isHost ? (
@@ -682,10 +690,18 @@ export default function Lobby() {
   const { 
     roomState, players, isHost, playerId, updateSettings, 
     startGame, advancePhase, castVote, endVoting, resetGame,
-    socketConnected
+    kickPlayer, socketConnected, joinRoom
   } = useGame();
 
   const [localSettings, setLocalSettings] = React.useState(null);
+  const debounceTimeoutRef = React.useRef(null);
+
+  // Auto-rejoin if page is reloaded and state is lost
+  useEffect(() => {
+    if (!roomState && playerId && roomCode) {
+      joinRoom(roomCode, playerId).catch(() => navigate('/join'));
+    }
+  }, [roomState, playerId, roomCode, joinRoom, navigate]);
   const debounceTimeoutRef = React.useRef(null);
 
   // Sync localSettings with incoming roomState updates
@@ -830,6 +846,8 @@ export default function Lobby() {
                 roomCode={roomCode}
                 playerList={playerList}
                 isHost={isHost}
+                playerId={playerId}
+                kickPlayer={kickPlayer}
                 settings={settings}
                 totalPlayers={totalPlayers}
                 mafiaCount={mafiaCount}
