@@ -165,6 +165,7 @@ const broadcastRoomState = (roomCode) => {
     const sortedPlayers = Array.from(roomPlayers.values()).sort((a, b) => a.joined_at - b.joined_at);
     sortedPlayers.forEach(p => {
       playersObj[p.player_id] = {
+        player_id: p.player_id,
         name: p.name,
         isHost: p.is_host,
         role: p.role,
