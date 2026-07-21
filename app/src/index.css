@@ -7,14 +7,28 @@
   html {
     text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%;
+    overscroll-behavior-y: none;
+    overflow: hidden;
   }
 
   body {
     @apply bg-brand-base text-brand-offwhite font-sans antialiased;
+    overscroll-behavior-y: none;
+    overflow: hidden;
+    height: 100dvh;
+    touch-action: pan-y;
   }
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-display;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
 

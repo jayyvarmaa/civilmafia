@@ -14,15 +14,17 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-brand-base text-brand-offwhite flex flex-col items-center justify-center p-4 overflow-hidden">
-      <div className="w-full max-w-md w-full relative">
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/create" element={<CreateRoom />} />
-          <Route path="/join" element={<JoinRoom />} />
-          <Route path="/name" element={<NameEntry />} />
-          <Route path="/lobby/:roomCode" element={<Lobby />} />
-        </Routes>
+    <div className="fixed inset-0 bg-brand-base text-brand-offwhite flex flex-col items-center justify-center overflow-hidden">
+      <div className="w-full max-w-md h-full relative overflow-y-auto overflow-x-hidden p-4 scrollbar-hide">
+        <div className="min-h-full flex flex-col justify-center">
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/create" element={<CreateRoom />} />
+            <Route path="/join" element={<JoinRoom />} />
+            <Route path="/name" element={<NameEntry />} />
+            <Route path="/lobby/:roomCode" element={<Lobby />} />
+          </Routes>
+        </div>
       </div>
     </div>
   )
