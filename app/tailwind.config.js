@@ -7,7 +7,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        'brand-base': '#0c0002',
+        'brand-base': '#000000',
         'brand-surface': '#490206',
         'brand-primary': '#c90511',
         'brand-secondary': '#ffa902',
